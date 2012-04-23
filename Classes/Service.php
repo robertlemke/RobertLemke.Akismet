@@ -187,6 +187,9 @@ class Service {
 		$request = Request::create(new Uri('http://' . ($useAccountSubdomain ? $this->settings['apiKey'] . '.' :  '') . $this->settings['serviceHost'] . '/' . self::API_VERSION . '/' . $command), 'POST', $arguments);
 		$response = $this->browser->sendRequest($request);
 
+		if (!is_object($response)) {
+			throw new Exception\ConnectionException('Could not connect to Akismet API, virtual browser returned "' . var_export($response, TRUE) . '"', 1335190115);
+		}
 		if ($response->getStatusCode() !== 200) {
 			throw new Exception\ConnectionException('The Akismet API server did not respond with a 200 status code: "' . $response->getStatus() . '"', 1335190117);
 		}
