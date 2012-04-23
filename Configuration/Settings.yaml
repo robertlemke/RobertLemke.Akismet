@@ -1,0 +1,5 @@
+RobertLemke:
+  Akismet:
+    serviceHost: 'rest.akismet.com'
+    apiKey: ''
+    blogUri: ''
