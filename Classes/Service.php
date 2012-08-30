@@ -33,6 +33,12 @@ class Service {
 	protected $browserRequestEngine;
 
 	/**
+	 * @FLOW3\Inject
+	 * @var \TYPO3\FLOW3\Log\SystemLoggerInterface
+	 */
+	protected $systemLogger;
+
+	/**
 	 * @var array
 	 */
 	protected $settings;
@@ -113,8 +119,10 @@ class Service {
 		$response = $this->sendRequest('comment-check', $arguments);
 		switch ($response->getContent()) {
 			case 'true':
+				$this->systemLogger->log(sprintf('Akismet determined that the given comment referring to content with permalink "%s" is spam.', $permaLink), LOG_INFO);
 				return TRUE;
 			case 'false':
+				$this->systemLogger->log(sprintf('Akismet determined that the given comment referring to content with permalink "%s" is not spam.', $permaLink), LOG_INFO);
 				return FALSE;
 			default:
 				throw new Exception\ConnectionException('API error: ' . $response->getContent() . ' ' . $response->getHeader('X-akismet-debug-help'), 1335192487);
@@ -143,6 +151,7 @@ class Service {
 			'comment_content' => $content
 		);
 		$this->sendRequest('submit-spam', $arguments);
+		$this->systemLogger->log(sprintf('Submitted new sample of spam (comment for "%s") to Akismet.', $permaLink), LOG_INFO);
 	}
 
 	/**
@@ -167,6 +176,7 @@ class Service {
 			'comment_content' => $content
 		);
 		$this->sendRequest('submit-ham', $arguments);
+		$this->systemLogger->log(sprintf('Submitted new sample of ham (comment for "%s") to Akismet.', $permaLink), LOG_INFO);
 	}
 
 	/**
@@ -184,7 +194,11 @@ class Service {
 		$arguments['user_agent'] = $this->currentRequest->getHeaders()->get('User-Agent');
 		$arguments['referrer'] = $this->currentRequest->getHeaders()->get('Referer');
 
-		$request = Request::create(new Uri('http://' . ($useAccountSubdomain ? $this->settings['apiKey'] . '.' :  '') . $this->settings['serviceHost'] . '/' . self::API_VERSION . '/' . $command), 'POST', $arguments);
+		$uri = new Uri('http://' . ($useAccountSubdomain ? $this->settings['apiKey'] . '.' :  '') . $this->settings['serviceHost'] . '/' . self::API_VERSION . '/' . $command);
+		$request = Request::create($uri, 'POST', $arguments);
+		$request->setContent('');
+
+		$this->systemLogger->log('Sending request to Akismet service', LOG_DEBUG, array('uri' => (string)$uri, 'arguments' => $arguments));
 		$response = $this->browser->sendRequest($request);
 
 		if (!is_object($response)) {

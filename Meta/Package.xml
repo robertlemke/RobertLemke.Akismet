@@ -3,5 +3,5 @@
 	<key>RobertLemke.Akismet</key>
 	<title>Akismet</title>
 	<description>Integration of Akismet, an intelligent comment spam detector, for FLOW3</description>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 </package>

@@ -1,5 +1,13 @@
 RobertLemke:
   Akismet:
+
+    # Defines the host of the Akismet service. Does not have to be changed unless
+    # Akismet changes its service entry point.
     serviceHost: 'rest.akismet.com'
+
+    # The API key you have been provided by Akismet
     apiKey: ''
+
+    # The frontpage URI pointing to your blog or the site using Akismet. Must be
+    # a full URI, for example "http://robertlemke.com/blog".
     blogUri: ''
