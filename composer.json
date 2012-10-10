@@ -1,6 +1,6 @@
 {
     "name": "robertlemke/akismet",
-    "type": "typo3-flow-plugin",
+    "type": "typo3-flow-package",
     "description": "Akismet plugin for TYPO3 Flow applications",
     "homepage": "https://github.com/robertlemke/RobertLemke.Akismet",
     "keywords": ["plugin"],
