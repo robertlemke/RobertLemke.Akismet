@@ -1,4 +1,4 @@
 Akismet
 =======
 
-FLOW3 plugin which includes the Akismet API
+TYPO3 Flow plugin which includes the Akismet API

@@ -1,8 +1,8 @@
 {
     "name": "robertlemke/akismet",
-    "type": "typo3-flow-plugins",
+    "type": "typo3-flow-plugin",
     "description": "Integration of Akismet, an intelligent comment spam detector, for FLOW3",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "require": {
         "typo3/flow": "*"
     },
