@@ -5,36 +5,36 @@ namespace RobertLemke\Akismet;
  * This script belongs to the FLOW3 package "RobertLemke.Akismet".        *
  *                                                                        */
 
-use TYPO3\FLOW3\Http\Request;
-use TYPO3\FLOW3\Http\Response;
-use TYPO3\FLOW3\Http\Uri;
+use TYPO3\Flow\Http\Request;
+use TYPO3\Flow\Http\Response;
+use TYPO3\Flow\Http\Uri;
 
-use TYPO3\FLOW3\Annotations as FLOW3;
+use TYPO3\Flow\Annotations as Flow;
 
 /**
  * An Akismet service wrapper class for FLOW3
  *
- * @FLOW3\Scope("singleton")
+ * @Flow\Scope("singleton")
  */
 class Service {
 
 	const API_VERSION = '1.1';
 
 	/**
-	 * @FLOW3\Inject
-	 * @var \TYPO3\FLOW3\Http\Client\Browser
+	 * @Flow\Inject
+	 * @var \TYPO3\Flow\Http\Client\Browser
 	 */
 	protected $browser;
 
 	/**
-	 * @FLOW3\Inject
-	 * @var \TYPO3\FLOW3\Http\Client\RequestEngineInterface
+	 * @Flow\Inject
+	 * @var \TYPO3\Flow\Http\Client\RequestEngineInterface
 	 */
 	protected $browserRequestEngine;
 
 	/**
-	 * @FLOW3\Inject
-	 * @var \TYPO3\FLOW3\Log\SystemLoggerInterface
+	 * @Flow\Inject
+	 * @var \TYPO3\Flow\Log\SystemLoggerInterface
 	 */
 	protected $systemLogger;
 
@@ -44,7 +44,7 @@ class Service {
 	protected $settings;
 
 	/**
-	 * @var \TYPO3\FLOW3\Http\Request
+	 * @var \TYPO3\Flow\Http\Request
 	 */
 	protected $currentRequest;
 
@@ -75,7 +75,7 @@ class Service {
 	 *
 	 * $akismet->setCurrentRequest($this->request->getHttpRequest());
 	 *
-	 * @param \TYPO3\FLOW3\Http\Request $request
+	 * @param \TYPO3\Flow\Http\Request $request
 	 * @return void
 	 * @api
 	 */
@@ -185,7 +185,7 @@ class Service {
 	 * @param string $command Name of the command according to the API documentation, for example "verify-key"
 	 * @param array $arguments Post arguments (field => value) to send to the Askismet server
 	 * @param boolean $useAccountSubdomain If the api key should be prepended to the host name (default case)
-	 * @return \TYPO3\FLOW3\Http\Response The response from the POST request
+	 * @return \TYPO3\Flow\Http\Response The response from the POST request
 	 */
 	protected function sendRequest($command, array $arguments, $useAccountSubdomain = TRUE) {
 		$arguments['key'] = $this->settings['apiKey'];

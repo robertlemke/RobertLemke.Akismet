@@ -5,13 +5,13 @@ namespace RobertLemke\Akismet\Tests\Functional;
  * This script belongs to the FLOW3 package "RobertLemke.Akismet".        *
  *                                                                        */
 
-use TYPO3\FLOW3\Http\Request;
-use TYPO3\FLOW3\Http\Uri;
+use TYPO3\Flow\Http\Request;
+use TYPO3\Flow\Http\Uri;
 
 /**
  * Functional tests for the Akismet Service
  */
-class Servicetest extends \TYPO3\FLOW3\Tests\FunctionalTestCase {
+class Servicetest extends \TYPO3\Flow\Tests\FunctionalTestCase {
 
 	/**
 	 * @var boolean
