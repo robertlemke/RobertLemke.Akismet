@@ -1,24 +1,24 @@
 {
-    "name": "robertlemke/akismet",
-    "type": "typo3-flow-plugin",
-    "description": "Akismet plugin for TYPO3 Flow applications",
-    "homepage": "https://github.com/robertlemke/RobertLemke.Akismet",
-    "keywords": ["plugin"],
-	"license": "MIT",
-    "authors": [
-        {
-            "name": "Robert Lemke",
-			"email": "rl@robertlemke.com",
-            "homepage": "http://robertlemke.com"
-        }
-    ],
+	"name":"robertlemke/akismet",
+	"type":"typo3-flow-plugin",
+	"description":"Akismet plugin for TYPO3 Flow applications",
+	"homepage":"https://github.com/robertlemke/RobertLemke.Akismet",
+	"keywords":["plugin"],
+	"license":"MIT",
+	"authors":[
+		{
+			"name":"Robert Lemke",
+			"email":"rl@robertlemke.com",
+			"homepage":"http://robertlemke.com"
+		}
+	],
 
-    "require": {
-        "typo3/flow": "*"
-    },
-    "autoload": {
-        "psr-0": {
-            "RobertLemke\\Akismet": "Classes"
-        }
-    }
+	"require":{
+		"typo3/flow":"*"
+	},
+	"autoload":{
+		"psr-0":{
+			"RobertLemke\\Akismet":"Classes"
+		}
+	}
 }

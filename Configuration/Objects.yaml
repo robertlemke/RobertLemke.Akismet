@@ -1,4 +1,4 @@
 RobertLemke\Akismet\Service:
   properties:
     browserRequestEngine:
-      object: 'TYPO3\FLOW3\Http\Client\CurlEngine'
+      object: 'TYPO3\Flow\Http\Client\CurlEngine'
