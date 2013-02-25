@@ -1,15 +1,22 @@
 {
-    "name": "robertlemke/akismet",
-    "type": "typo3-flow-plugin",
-    "description": "Integration of Akismet, an intelligent comment spam detector, for TYPO3 Flow",
-    "version": "1.1.0",
-    "license": ["MIT"],
-    "require": {
-        "typo3/flow": "*"
-    },
-    "autoload": {
-        "psr-0": {
-            "RobertLemke\\Akismet": "Classes"
-        }
-    }
+	"name": "robertlemke/akismet",
+	"type": "typo3-flow-plugin",
+	"description": "Integration of Akismet, an intelligent comment spam detector, for TYPO3 Flow",
+	"license": ["MIT"],
+	"authors": [
+		{
+			"name": "Robert Lemke",
+			"email": "rl@robertlemke.com",
+			"homepage": "http://robertlemke.com",
+			"role": "Developer"
+		}
+	],
+	"require": {
+		"typo3/flow": "~2.0"
+	},
+	"autoload": {
+		"psr-0": {
+			"RobertLemke\\Akismet": "Classes"
+		}
+	}
 }

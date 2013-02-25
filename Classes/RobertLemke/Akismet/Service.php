@@ -12,7 +12,7 @@ use TYPO3\Flow\Http\Uri;
 use TYPO3\Flow\Annotations as Flow;
 
 /**
- * An Akismet service wrapper class for FLOW3
+ * An Akismet service wrapper class for TYPO3 Flow
  *
  * @Flow\Scope("singleton")
  */
