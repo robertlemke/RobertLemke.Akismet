@@ -108,6 +108,11 @@ class Service {
 	 * @api
 	 */
 	public function isCommentSpam($permaLink, $content, $type, $author = '', $authorEmailAddress = '', $authorUri = '') {
+		if ($this->settings['apiKey'] === '') {
+			$this->systemLogger->log('Could not check comment for spambecause no Akismet API key was provided in the settings.', LOG_DEBUG);
+			return FALSE;
+		}
+
 		$arguments = array(
 			'permalink' => $permaLink,
 			'comment_type' => $type,
@@ -142,6 +147,10 @@ class Service {
 	 * @api
 	 */
 	public function submitSpam($permaLink, $content, $type, $author = '', $authorEmailAddress = '', $authorUri = '') {
+		if ($this->settings['apiKey'] === '') {
+			$this->systemLogger->log('Could not submit new spam sample to Akismet because no API key was provided in the settings.', LOG_WARNING);
+		}
+
 		$arguments = array(
 			'permalink' => $permaLink,
 			'comment_type' => $type,
@@ -167,6 +176,10 @@ class Service {
 	 * @api
 	 */
 	public function submitHam($permaLink, $content, $type, $author = '', $authorEmailAddress = '', $authorUri = '') {
+		if ($this->settings['apiKey'] === '') {
+			$this->systemLogger->log('Could not submit new ham sample to Akismet because no API key was provided in the settings.', LOG_WARNING);
+		}
+
 		$arguments = array(
 			'permalink' => $permaLink,
 			'comment_type' => $type,
