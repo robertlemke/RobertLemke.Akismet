@@ -109,7 +109,7 @@ class Service {
 	 */
 	public function isCommentSpam($permaLink, $content, $type, $author = '', $authorEmailAddress = '', $authorUri = '') {
 		if ($this->settings['apiKey'] === '') {
-			$this->systemLogger->log('Could not check comment for spambecause no Akismet API key was provided in the settings.', LOG_DEBUG);
+			$this->systemLogger->log('Could not check comment for spam because no Akismet API key was provided in the settings.', LOG_DEBUG);
 			return FALSE;
 		}
 
