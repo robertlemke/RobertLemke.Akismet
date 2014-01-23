@@ -62,6 +62,9 @@ class Service {
 	 * @return void
 	 */
 	public function initializeObject() {
+		if ($this->browserRequestEngine instanceof \TYPO3\Flow\Object\DependencyInjection\DependencyProxy) {
+			$this->browserRequestEngine->_activateDependency();
+		}
 		$this->browser->setRequestEngine($this->browserRequestEngine);
 	}
 
