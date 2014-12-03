@@ -2,7 +2,7 @@
 namespace RobertLemke\Akismet\Tests\Functional;
 
 /*                                                                        *
- * This script belongs to the FLOW3 package "RobertLemke.Akismet".        *
+ * This script belongs to the TYPO3 Flow package "RobertLemke.Akismet".   *
  *                                                                        */
 
 use TYPO3\Flow\Http\Request;
