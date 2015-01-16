@@ -3,6 +3,11 @@ namespace RobertLemke\Akismet\Tests\Functional;
 
 /*                                                                        *
  * This script belongs to the TYPO3 Flow package "RobertLemke.Akismet".   *
+ *                                                                        *
+ * It is free software; you can redistribute it and/or modify it under    *
+ * the terms of the MIT License.                                          *
+ *                                                                        *
+ * The TYPO3 project - inspiring people to share!                         *
  *                                                                        */
 
 use TYPO3\Flow\Http\Request;

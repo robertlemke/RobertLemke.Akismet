@@ -3,6 +3,11 @@ namespace RobertLemke\Akismet;
 
 /*                                                                        *
  * This script belongs to the TYPO3 Flow package "RobertLemke.Akismet".   *
+ *                                                                        *
+ * It is free software; you can redistribute it and/or modify it under    *
+ * the terms of the MIT License.                                          *
+ *                                                                        *
+ * The TYPO3 project - inspiring people to share!                         *
  *                                                                        */
 
 use TYPO3\Flow\Http\Request;
@@ -107,7 +112,7 @@ class Service {
 	 * @param string $author The author name specified
 	 * @param string $authorEmailAddress The email address specified
 	 * @param string $authorUri A URI specified linking to the author's homepage or similar
-	 * @return bool TRUE if the comment is considered spam, otherwise FALSE
+	 * @return boolean TRUE if the comment is considered spam, otherwise FALSE
 	 * @throws Exception\ConnectionException
 	 * @api
 	 */
