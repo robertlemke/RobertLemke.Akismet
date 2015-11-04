@@ -2,14 +2,19 @@
 namespace RobertLemke\Akismet;
 
 /*                                                                        *
- * This script belongs to the FLOW3 package "RobertLemke.Akismet".        *
+ * This script belongs to the TYPO3 Flow package "RobertLemke.Akismet".   *
+ *                                                                        *
+ * It is free software; you can redistribute it and/or modify it under    *
+ * the terms of the MIT License.                                          *
+ *                                                                        *
+ * The TYPO3 project - inspiring people to share!                         *
  *                                                                        */
 
 use TYPO3\Flow\Http\Request;
-use TYPO3\Flow\Http\Response;
 use TYPO3\Flow\Http\Uri;
 
 use TYPO3\Flow\Annotations as Flow;
+use TYPO3\Flow\Object\DependencyInjection\DependencyProxy;
 
 /**
  * An Akismet service wrapper class for TYPO3 Flow
@@ -62,7 +67,7 @@ class Service {
 	 * @return void
 	 */
 	public function initializeObject() {
-		if ($this->browserRequestEngine instanceof \TYPO3\Flow\Object\DependencyInjection\DependencyProxy) {
+		if ($this->browserRequestEngine instanceof DependencyProxy) {
 			$this->browserRequestEngine->_activateDependency();
 		}
 		$this->browser->setRequestEngine($this->browserRequestEngine);
@@ -108,10 +113,11 @@ class Service {
 	 * @param string $authorEmailAddress The email address specified
 	 * @param string $authorUri A URI specified linking to the author's homepage or similar
 	 * @return boolean TRUE if the comment is considered spam, otherwise FALSE
+	 * @throws Exception\ConnectionException
 	 * @api
 	 */
 	public function isCommentSpam($permaLink, $content, $type, $author = '', $authorEmailAddress = '', $authorUri = '') {
-		if ($this->settings['apiKey'] === '') {
+		if ($this->settings['apiKey'] === '' || $this->settings['apiKey'] === NULL) {
 			$this->systemLogger->log('Could not check comment for spam because no Akismet API key was provided in the settings.', LOG_DEBUG);
 			return FALSE;
 		}
@@ -202,6 +208,7 @@ class Service {
 	 * @param array $arguments Post arguments (field => value) to send to the Askismet server
 	 * @param boolean $useAccountSubdomain If the api key should be prepended to the host name (default case)
 	 * @return \TYPO3\Flow\Http\Response The response from the POST request
+	 * @throws Exception\ConnectionException
 	 */
 	protected function sendRequest($command, array $arguments, $useAccountSubdomain = TRUE) {
 		$arguments['key'] = $this->settings['apiKey'];
