@@ -1,54 +1,54 @@
 <?php
 namespace RobertLemke\Akismet\Tests\Functional;
 
-/*                                                                        *
- * This script belongs to the TYPO3 Flow package "RobertLemke.Akismet".   *
- *                                                                        *
- * It is free software; you can redistribute it and/or modify it under    *
- * the terms of the MIT License.                                          *
- *                                                                        *
- * The TYPO3 project - inspiring people to share!                         *
- *                                                                        */
+/*
+ * This file is part of the RobertLemke.Akismet package.
+ *
+ * (c) Robert Lemke
+ *
+ * This package is Open Source Software. For the full copyright and license
+ * information, please view the LICENSE file which was distributed with this
+ * source code.
+ */
 
+use RobertLemke\Akismet\Service;
 use TYPO3\Flow\Http\Request;
 use TYPO3\Flow\Http\Uri;
 
 /**
  * Functional tests for the Akismet Service
  */
-class Servicetest extends \TYPO3\Flow\Tests\FunctionalTestCase {
+class Servicetest extends \TYPO3\Flow\Tests\FunctionalTestCase
+{
 
-	/**
-	 * @var boolean
-	 */
-	protected $testableHttpEnabled = TRUE;
+    /**
+     * @var Service
+     */
+    protected $service;
 
-	/**
-	 * @var \RobertLemke\Akismet\Service
-	 */
-	protected $service;
+    /**
+     * Set up for this test case
+     */
+    public function setUp()
+    {
+        parent::setUp();
+        $currentRequest = Request::create(new Uri('http://robertlemke.com/blog/posts/functional-test-post.html'));
+        $this->service = $this->objectManager->get(Service::class);
+        $this->service->setCurrentRequest($currentRequest);
+    }
 
-	/**
-	 * Set up for this test case
-	 */
-	public function setUp() {
-		parent::setUp();
-		$currentRequest = Request::create(new Uri('http://robertlemke.com/blog/posts/functional-test-post.html'));
-		$this->service = $this->objectManager->get('RobertLemke\Akismet\Service');
-		$this->service->setCurrentRequest($currentRequest);
-	}
-
-	/**
-	 * @test
-	 */
-	public function isApiKeyValidReturnsFalseOnInvalidApiKey() {
-		$settings = array(
-			'serviceHost' => 'rest.akismet.com',
-			'apiKey' => 'invalidapikey',
-			'blogUri' => 'http://akismet.com'
-		);
-		$this->service->injectSettings($settings);
-		$this->assertFalse($this->service->isApiKeyValid());
-	}
+    /**
+     * @test
+     */
+    public function isApiKeyValidReturnsFalseOnInvalidApiKey()
+    {
+        $settings = array(
+            'serviceHost' => 'rest.akismet.com',
+            'apiKey' => 'invalidapikey',
+            'blogUri' => 'http://akismet.com'
+        );
+        $this->service->injectSettings($settings);
+        $this->assertFalse($this->service->isApiKeyValid());
+    }
 
 }

@@ -1,7 +1,7 @@
 Akismet
 =======
 
-TYPO3 Flow package which provides convenient access to the Akismet REST service.
+Flow package which provides convenient access to the Akismet REST service.
 
 Setup
 -----

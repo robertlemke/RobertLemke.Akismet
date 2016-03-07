@@ -1,18 +1,20 @@
 <?php
 namespace RobertLemke\Akismet\Exception;
 
-/*                                                                        *
- * This script belongs to the TYPO3 Flow package "RobertLemke.Akismet".   *
- *                                                                        *
- * It is free software; you can redistribute it and/or modify it under    *
- * the terms of the MIT License.                                          *
- *                                                                        *
- * The TYPO3 project - inspiring people to share!                         *
- *                                                                        */
+/*
+ * This file is part of the RobertLemke.Akismet package.
+ *
+ * (c) Robert Lemke
+ *
+ * This package is Open Source Software. For the full copyright and license
+ * information, please view the LICENSE file which was distributed with this
+ * source code.
+ */
 
 /**
  * A connection exception
  */
-class ConnectionException extends \TYPO3\Flow\Exception {
+class ConnectionException extends \TYPO3\Flow\Exception
+{
 
 }
