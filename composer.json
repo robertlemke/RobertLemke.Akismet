@@ -1,6 +1,6 @@
 {
     "name": "robertlemke/akismet",
-    "type": "typo3-flow-plugin",
+    "type": "neos-package",
     "description": "Integration of Akismet, an intelligent comment spam detector, for Flow",
     "license": "MIT",
     "authors": [
@@ -15,8 +15,8 @@
         "typo3/flow": "~2.0|~3.0"
     },
     "autoload": {
-        "psr-0": {
-            "RobertLemke\\Akismet": "Classes"
+        "psr-4": {
+            "RobertLemke\\Akismet\\": "Classes"
         }
     },
     "extra": {
