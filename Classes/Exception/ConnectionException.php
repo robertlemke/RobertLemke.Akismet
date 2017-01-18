@@ -14,7 +14,7 @@ namespace RobertLemke\Akismet\Exception;
 /**
  * A connection exception
  */
-class ConnectionException extends \TYPO3\Flow\Exception
+class ConnectionException extends \Neos\Flow\Exception
 {
 
 }

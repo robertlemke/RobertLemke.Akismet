@@ -11,11 +11,11 @@ namespace RobertLemke\Akismet;
  * source code.
  */
 
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Http\Request;
-use TYPO3\Flow\Http\Response;
-use TYPO3\Flow\Http\Uri;
-use TYPO3\Flow\Object\DependencyInjection\DependencyProxy;
+use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Http\Request;
+use Neos\Flow\Http\Response;
+use Neos\Flow\Http\Uri;
+use Neos\Flow\ObjectManagement\DependencyInjection\DependencyProxy;
 
 /**
  * An Akismet service wrapper class for Flow
@@ -29,19 +29,19 @@ class Service
 
     /**
      * @Flow\Inject
-     * @var \TYPO3\Flow\Http\Client\Browser
+     * @var \Neos\Flow\Http\Client\Browser
      */
     protected $browser;
 
     /**
      * @Flow\Inject
-     * @var \TYPO3\Flow\Http\Client\RequestEngineInterface
+     * @var \Neos\Flow\Http\Client\RequestEngineInterface
      */
     protected $browserRequestEngine;
 
     /**
      * @Flow\Inject
-     * @var \TYPO3\Flow\Log\SystemLoggerInterface
+     * @var \Neos\Flow\Log\SystemLoggerInterface
      */
     protected $systemLogger;
 
