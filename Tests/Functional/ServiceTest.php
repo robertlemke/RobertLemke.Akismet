@@ -12,13 +12,13 @@ namespace RobertLemke\Akismet\Tests\Functional;
  */
 
 use RobertLemke\Akismet\Service;
-use TYPO3\Flow\Http\Request;
-use TYPO3\Flow\Http\Uri;
+use Neos\Flow\Http\Request;
+use Neos\Flow\Http\Uri;
 
 /**
  * Functional tests for the Akismet Service
  */
-class Servicetest extends \TYPO3\Flow\Tests\FunctionalTestCase
+class Servicetest extends \Neos\Flow\Tests\FunctionalTestCase
 {
 
     /**
