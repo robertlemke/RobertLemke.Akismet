@@ -15,7 +15,9 @@ use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Http\Request;
 use Neos\Flow\Http\Response;
 use Neos\Flow\Http\Uri;
+use Neos\Flow\Log\Utility\LogEnvironment;
 use Neos\Flow\ObjectManagement\DependencyInjection\DependencyProxy;
+use Psr\Log\LoggerInterface;
 
 /**
  * An Akismet service wrapper class for Flow
@@ -41,9 +43,9 @@ class Service
 
     /**
      * @Flow\Inject
-     * @var \Neos\Flow\Log\SystemLoggerInterface
+     * @var LoggerInterface
      */
-    protected $systemLogger;
+    protected $logger;
 
     /**
      * @var array
@@ -126,7 +128,7 @@ class Service
     public function isCommentSpam($permaLink, $content, $type, $author = '', $authorEmailAddress = '', $authorUri = '')
     {
         if ($this->settings['apiKey'] === '' || $this->settings['apiKey'] === null) {
-            $this->systemLogger->log('Could not check comment for spam because no Akismet API key was provided in the settings.', LOG_DEBUG);
+            $this->logger->debug('Could not check comment for spam because no Akismet API key was provided in the settings.', LogEnvironment::fromMethodName(__METHOD__));
 
             return false;
         }
@@ -142,11 +144,11 @@ class Service
         $response = $this->sendRequest('comment-check', $arguments);
         switch ($response->getContent()) {
             case 'true':
-                $this->systemLogger->log(sprintf('Akismet determined that the given comment referring to content with permalink "%s" is spam.', $permaLink), LOG_INFO);
+                $this->logger->info(sprintf('Akismet determined that the given comment referring to content with permalink "%s" is spam.', $permaLink), LogEnvironment::fromMethodName(__METHOD__));
 
                 return true;
             case 'false':
-                $this->systemLogger->log(sprintf('Akismet determined that the given comment referring to content with permalink "%s" is not spam.', $permaLink), LOG_INFO);
+                $this->logger->info(sprintf('Akismet determined that the given comment referring to content with permalink "%s" is not spam.', $permaLink), LogEnvironment::fromMethodName(__METHOD__));
 
                 return false;
             default:
@@ -169,7 +171,7 @@ class Service
     public function submitSpam($permaLink, $content, $type, $author = '', $authorEmailAddress = '', $authorUri = '')
     {
         if ($this->settings['apiKey'] === '') {
-            $this->systemLogger->log('Could not submit new spam sample to Akismet because no API key was provided in the settings.', LOG_WARNING);
+            $this->logger->warning('Could not submit new spam sample to Akismet because no API key was provided in the settings.', LogEnvironment::fromMethodName(__METHOD__));
         }
 
         $arguments = array(
@@ -181,7 +183,7 @@ class Service
             'comment_content' => $content
         );
         $this->sendRequest('submit-spam', $arguments);
-        $this->systemLogger->log(sprintf('Submitted new sample of spam (comment for "%s") to Akismet.', $permaLink), LOG_INFO);
+        $this->logger->info(sprintf('Submitted new sample of spam (comment for "%s") to Akismet.', $permaLink), LogEnvironment::fromMethodName(__METHOD__));
     }
 
     /**
@@ -199,7 +201,7 @@ class Service
     public function submitHam($permaLink, $content, $type, $author = '', $authorEmailAddress = '', $authorUri = '')
     {
         if ($this->settings['apiKey'] === '') {
-            $this->systemLogger->log('Could not submit new ham sample to Akismet because no API key was provided in the settings.', LOG_WARNING);
+            $this->logger->log('Could not submit new ham sample to Akismet because no API key was provided in the settings.', LOG_WARNING);
         }
 
         $arguments = array(
@@ -211,7 +213,7 @@ class Service
             'comment_content' => $content
         );
         $this->sendRequest('submit-ham', $arguments);
-        $this->systemLogger->log(sprintf('Submitted new sample of ham (comment for "%s") to Akismet.', $permaLink), LOG_INFO);
+        $this->logger->info(sprintf('Submitted new sample of ham (comment for "%s") to Akismet.', $permaLink), LogEnvironment::fromMethodName(__METHOD__));
     }
 
     /**
@@ -235,7 +237,7 @@ class Service
         $request = Request::create($uri, 'POST', $arguments);
         $request->setContent('');
 
-        $this->systemLogger->log('Sending request to Akismet service', LOG_DEBUG, array('uri' => (string)$uri, 'arguments' => $arguments));
+        $this->logger->debug('Sending request to Akismet service', array_merge(LogEnvironment::fromMethodName(__METHOD__), ['uri' => (string)$uri, 'arguments' => $arguments]));
         $response = $this->browser->sendRequest($request);
 
         if (!is_object($response)) {
