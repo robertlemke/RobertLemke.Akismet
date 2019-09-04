@@ -16,11 +16,13 @@ namespace RobertLemke\Akismet;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Http\Client\Browser;
 use Neos\Flow\Http\Client\RequestEngineInterface;
-use Neos\Flow\Http\Request;
-use Neos\Flow\Http\Response;
-use Neos\Flow\Http\Uri;
+use Neos\Flow\Http\ServerRequestAttributes;
 use Neos\Flow\Log\Utility\LogEnvironment;
 use Neos\Flow\ObjectManagement\DependencyInjection\DependencyProxy;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestFactoryInterface;
+use Psr\Http\Message\ServerRequestInterface as HttpRequestInterface;
+use Psr\Http\Message\UriFactoryInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -56,9 +58,21 @@ class Service
     protected $settings;
 
     /**
-     * @var Request
+     * @var HttpRequestInterface
      */
     protected $currentRequest;
+
+    /**
+     * @Flow\Inject
+     * @var UriFactoryInterface
+     */
+    protected $uriFactory;
+
+    /**
+     * @Flow\Inject
+     * @var ServerRequestFactoryInterface
+     */
+    protected $serverRequestFactory;
 
     /**
      * @param array $settings
@@ -92,11 +106,11 @@ class Service
      *
      * $akismet->setCurrentRequest($this->request->getHttpRequest());
      *
-     * @param Request $request
+     * @param HttpRequestInterface $request
      * @return void
      * @api
      */
-    public function setCurrentRequest(Request $request): void
+    public function setCurrentRequest(HttpRequestInterface $request): void
     {
         $this->currentRequest = $request;
     }
@@ -113,7 +127,7 @@ class Service
     {
         $response = $this->sendRequest('verify-key', [], false);
 
-        return ($response->getContent() === 'valid');
+        return ($response->getBody()->getContents() === 'valid');
     }
 
     /**
@@ -146,7 +160,7 @@ class Service
             'comment_content' => $content
         ];
         $response = $this->sendRequest('comment-check', $arguments);
-        switch ($response->getContent()) {
+        switch ($response->getBody()->getContents()) {
             case 'true':
                 $this->logger->info(sprintf('Akismet determined that the given comment referring to content with permalink "%s" is spam.', $permaLink), LogEnvironment::fromMethodName(__METHOD__));
 
@@ -228,20 +242,19 @@ class Service
      * @param string $command Name of the command according to the API documentation, for example "verify-key"
      * @param array $arguments Post arguments (field => value) to send to the Askismet server
      * @param boolean $useAccountSubdomain If the api key should be prepended to the host name (default case)
-     * @return Response The response from the POST request
+     * @return ResponseInterface The response from the POST request
      * @throws Exception\ConnectionException
      */
-    protected function sendRequest(string $command, array $arguments,bool  $useAccountSubdomain = true): Response
+    protected function sendRequest(string $command, array $arguments, bool $useAccountSubdomain = true): ResponseInterface
     {
         $arguments['key'] = $this->settings['apiKey'];
         $arguments['blog'] = $this->settings['blogUri'];
-        $arguments['user_ip'] = $this->currentRequest->getClientIpAddress();
-        $arguments['user_agent'] = $this->currentRequest->getHeaders()->get('User-Agent');
-        $arguments['referrer'] = $this->currentRequest->getHeaders()->get('Referer');
+        $arguments['user_ip'] = $this->currentRequest->getAttribute(ServerRequestAttributes::CLIENT_IP);
+        $arguments['user_agent'] = $this->currentRequest->getHeader('User-Agent');
+        $arguments['referrer'] = $this->currentRequest->getHeader('Referer');
 
-        $uri = new Uri('http://' . ($useAccountSubdomain ? $this->settings['apiKey'] . '.' : '') . $this->settings['serviceHost'] . '/' . self::API_VERSION . '/' . $command);
-        $request = Request::create($uri, 'POST', $arguments);
-        $request->setContent('');
+        $uri = $this->uriFactory->createUri('http://' . ($useAccountSubdomain ? $this->settings['apiKey'] . '.' : '') . $this->settings['serviceHost'] . '/' . self::API_VERSION . '/' . $command);
+        $request = $this->serverRequestFactory->createServerRequest('POST', $uri);
 
         $this->logger->debug('Sending request to Akismet service', array_merge(LogEnvironment::fromMethodName(__METHOD__), ['uri' => (string)$uri, 'arguments' => $arguments]));
         $response = $this->browser->sendRequest($request);
