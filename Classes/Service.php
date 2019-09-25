@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace RobertLemke\Akismet;
 
 /*
@@ -12,10 +14,16 @@ namespace RobertLemke\Akismet;
  */
 
 use Neos\Flow\Annotations as Flow;
-use Neos\Flow\Http\Request;
-use Neos\Flow\Http\Response;
-use Neos\Flow\Http\Uri;
+use Neos\Flow\Http\Client\Browser;
+use Neos\Flow\Http\Client\RequestEngineInterface;
+use Neos\Flow\Http\ServerRequestAttributes;
+use Neos\Flow\Log\Utility\LogEnvironment;
 use Neos\Flow\ObjectManagement\DependencyInjection\DependencyProxy;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestFactoryInterface;
+use Psr\Http\Message\ServerRequestInterface as HttpRequestInterface;
+use Psr\Http\Message\UriFactoryInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * An Akismet service wrapper class for Flow
@@ -24,26 +32,25 @@ use Neos\Flow\ObjectManagement\DependencyInjection\DependencyProxy;
  */
 class Service
 {
-
     const API_VERSION = '1.1';
 
     /**
      * @Flow\Inject
-     * @var \Neos\Flow\Http\Client\Browser
+     * @var Browser
      */
     protected $browser;
 
     /**
      * @Flow\Inject
-     * @var \Neos\Flow\Http\Client\RequestEngineInterface
+     * @var RequestEngineInterface
      */
     protected $browserRequestEngine;
 
     /**
      * @Flow\Inject
-     * @var \Neos\Flow\Log\SystemLoggerInterface
+     * @var LoggerInterface
      */
-    protected $systemLogger;
+    protected $logger;
 
     /**
      * @var array
@@ -51,15 +58,27 @@ class Service
     protected $settings;
 
     /**
-     * @var Request
+     * @var HttpRequestInterface
      */
     protected $currentRequest;
+
+    /**
+     * @Flow\Inject
+     * @var UriFactoryInterface
+     */
+    protected $uriFactory;
+
+    /**
+     * @Flow\Inject
+     * @var ServerRequestFactoryInterface
+     */
+    protected $serverRequestFactory;
 
     /**
      * @param array $settings
      * @return void
      */
-    public function injectSettings(array $settings)
+    public function injectSettings(array $settings): void
     {
         $this->settings = $settings;
     }
@@ -69,7 +88,7 @@ class Service
      *
      * @return void
      */
-    public function initializeObject()
+    public function initializeObject(): void
     {
         if ($this->browserRequestEngine instanceof DependencyProxy) {
             $this->browserRequestEngine->_activateDependency();
@@ -87,11 +106,11 @@ class Service
      *
      * $akismet->setCurrentRequest($this->request->getHttpRequest());
      *
-     * @param Request $request
+     * @param HttpRequestInterface $request
      * @return void
      * @api
      */
-    public function setCurrentRequest(Request $request)
+    public function setCurrentRequest(HttpRequestInterface $request): void
     {
         $this->currentRequest = $request;
     }
@@ -101,13 +120,14 @@ class Service
      * is valid according to the Akismet service.
      *
      * @return boolean TRUE if the credentials are correct, otherwise FALSE
+     * @throws Exception\ConnectionException
      * @api
      */
-    public function isApiKeyValid()
+    public function isApiKeyValid(): bool
     {
-        $response = $this->sendRequest('verify-key', array(), false);
+        $response = $this->sendRequest('verify-key', [], false);
 
-        return ($response->getContent() === 'valid');
+        return ($response->getBody()->getContents() === 'valid');
     }
 
     /**
@@ -123,30 +143,30 @@ class Service
      * @throws Exception\ConnectionException
      * @api
      */
-    public function isCommentSpam($permaLink, $content, $type, $author = '', $authorEmailAddress = '', $authorUri = '')
+    public function isCommentSpam($permaLink, $content, $type, $author = '', $authorEmailAddress = '', $authorUri = ''): bool
     {
         if ($this->settings['apiKey'] === '' || $this->settings['apiKey'] === null) {
-            $this->systemLogger->log('Could not check comment for spam because no Akismet API key was provided in the settings.', LOG_DEBUG);
+            $this->logger->debug('Could not check comment for spam because no Akismet API key was provided in the settings.', LogEnvironment::fromMethodName(__METHOD__));
 
             return false;
         }
 
-        $arguments = array(
+        $arguments = [
             'permalink' => $permaLink,
             'comment_type' => $type,
             'comment_author' => $author,
             'comment_author_email' => $authorEmailAddress,
             'comment_author_url' => $authorUri,
             'comment_content' => $content
-        );
+        ];
         $response = $this->sendRequest('comment-check', $arguments);
-        switch ($response->getContent()) {
+        switch ($response->getBody()->getContents()) {
             case 'true':
-                $this->systemLogger->log(sprintf('Akismet determined that the given comment referring to content with permalink "%s" is spam.', $permaLink), LOG_INFO);
+                $this->logger->info(sprintf('Akismet determined that the given comment referring to content with permalink "%s" is spam.', $permaLink), LogEnvironment::fromMethodName(__METHOD__));
 
                 return true;
             case 'false':
-                $this->systemLogger->log(sprintf('Akismet determined that the given comment referring to content with permalink "%s" is not spam.', $permaLink), LOG_INFO);
+                $this->logger->info(sprintf('Akismet determined that the given comment referring to content with permalink "%s" is not spam.', $permaLink), LogEnvironment::fromMethodName(__METHOD__));
 
                 return false;
             default:
@@ -164,24 +184,25 @@ class Service
      * @param string $authorEmailAddress The email address specified
      * @param string $authorUri A URI specified linking to the author's homepage or similar
      * @return void
+     * @throws Exception\ConnectionException
      * @api
      */
-    public function submitSpam($permaLink, $content, $type, $author = '', $authorEmailAddress = '', $authorUri = '')
+    public function submitSpam(string $permaLink, string $content, string $type, string $author = '', string $authorEmailAddress = '', string $authorUri = ''): void
     {
         if ($this->settings['apiKey'] === '') {
-            $this->systemLogger->log('Could not submit new spam sample to Akismet because no API key was provided in the settings.', LOG_WARNING);
+            $this->logger->warning('Could not submit new spam sample to Akismet because no API key was provided in the settings.', LogEnvironment::fromMethodName(__METHOD__));
         }
 
-        $arguments = array(
+        $arguments = [
             'permalink' => $permaLink,
             'comment_type' => $type,
             'comment_author' => $author,
             'comment_author_email' => $authorEmailAddress,
             'comment_author_url' => $authorUri,
             'comment_content' => $content
-        );
+        ];
         $this->sendRequest('submit-spam', $arguments);
-        $this->systemLogger->log(sprintf('Submitted new sample of spam (comment for "%s") to Akismet.', $permaLink), LOG_INFO);
+        $this->logger->info(sprintf('Submitted new sample of spam (comment for "%s") to Akismet.', $permaLink), LogEnvironment::fromMethodName(__METHOD__));
     }
 
     /**
@@ -194,24 +215,25 @@ class Service
      * @param string $authorEmailAddress The email address specified
      * @param string $authorUri A URI specified linking to the author's homepage or similar
      * @return void
+     * @throws Exception\ConnectionException
      * @api
      */
-    public function submitHam($permaLink, $content, $type, $author = '', $authorEmailAddress = '', $authorUri = '')
+    public function submitHam(string $permaLink, string $content, string $type, string $author = '', string $authorEmailAddress = '', string $authorUri = ''): void
     {
         if ($this->settings['apiKey'] === '') {
-            $this->systemLogger->log('Could not submit new ham sample to Akismet because no API key was provided in the settings.', LOG_WARNING);
+            $this->logger->log('Could not submit new ham sample to Akismet because no API key was provided in the settings.', LOG_WARNING);
         }
 
-        $arguments = array(
+        $arguments = [
             'permalink' => $permaLink,
             'comment_type' => $type,
             'comment_author' => $author,
             'comment_author_email' => $authorEmailAddress,
             'comment_author_url' => $authorUri,
             'comment_content' => $content
-        );
+        ];
         $this->sendRequest('submit-ham', $arguments);
-        $this->systemLogger->log(sprintf('Submitted new sample of ham (comment for "%s") to Akismet.', $permaLink), LOG_INFO);
+        $this->logger->info(sprintf('Submitted new sample of ham (comment for "%s") to Akismet.', $permaLink), LogEnvironment::fromMethodName(__METHOD__));
     }
 
     /**
@@ -220,22 +242,21 @@ class Service
      * @param string $command Name of the command according to the API documentation, for example "verify-key"
      * @param array $arguments Post arguments (field => value) to send to the Askismet server
      * @param boolean $useAccountSubdomain If the api key should be prepended to the host name (default case)
-     * @return Response The response from the POST request
+     * @return ResponseInterface The response from the POST request
      * @throws Exception\ConnectionException
      */
-    protected function sendRequest($command, array $arguments, $useAccountSubdomain = true)
+    protected function sendRequest(string $command, array $arguments, bool $useAccountSubdomain = true): ResponseInterface
     {
         $arguments['key'] = $this->settings['apiKey'];
         $arguments['blog'] = $this->settings['blogUri'];
-        $arguments['user_ip'] = $this->currentRequest->getClientIpAddress();
-        $arguments['user_agent'] = $this->currentRequest->getHeaders()->get('User-Agent');
-        $arguments['referrer'] = $this->currentRequest->getHeaders()->get('Referer');
+        $arguments['user_ip'] = $this->currentRequest->getAttribute(ServerRequestAttributes::CLIENT_IP);
+        $arguments['user_agent'] = $this->currentRequest->getHeader('User-Agent');
+        $arguments['referrer'] = $this->currentRequest->getHeader('Referer');
 
-        $uri = new Uri('http://' . ($useAccountSubdomain ? $this->settings['apiKey'] . '.' : '') . $this->settings['serviceHost'] . '/' . self::API_VERSION . '/' . $command);
-        $request = Request::create($uri, 'POST', $arguments);
-        $request->setContent('');
+        $uri = $this->uriFactory->createUri('http://' . ($useAccountSubdomain ? $this->settings['apiKey'] . '.' : '') . $this->settings['serviceHost'] . '/' . self::API_VERSION . '/' . $command);
+        $request = $this->serverRequestFactory->createServerRequest('POST', $uri);
 
-        $this->systemLogger->log('Sending request to Akismet service', LOG_DEBUG, array('uri' => (string)$uri, 'arguments' => $arguments));
+        $this->logger->debug('Sending request to Akismet service', array_merge(LogEnvironment::fromMethodName(__METHOD__), ['uri' => (string)$uri, 'arguments' => $arguments]));
         $response = $this->browser->sendRequest($request);
 
         if (!is_object($response)) {
