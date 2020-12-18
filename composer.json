@@ -6,13 +6,13 @@
     "authors": [
         {
             "name": "Robert Lemke",
-            "email": "rl@robertlemke.com",
-            "homepage": "http://robertlemke.com",
+            "email": "robert@flownative.com",
+            "homepage": "https://www.flownative.com",
             "role": "Developer"
         }
     ],
     "require": {
-        "neos/flow": "^6.0"
+        "neos/flow": "^6.0 || ^7.0"
     },
     "autoload": {
         "psr-4": {
