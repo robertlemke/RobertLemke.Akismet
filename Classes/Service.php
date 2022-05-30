@@ -32,7 +32,7 @@ use Psr\Log\LoggerInterface;
  */
 class Service
 {
-    const API_VERSION = '1.1';
+    private const API_VERSION = '1.1';
 
     /**
      * @Flow\Inject
@@ -139,11 +139,11 @@ class Service
      * @param string $author The author name specified
      * @param string $authorEmailAddress The email address specified
      * @param string $authorUri A URI specified linking to the author's homepage or similar
-     * @return boolean TRUE if the comment is considered spam, otherwise FALSE
+     * @return bool TRUE if the comment is considered spam, otherwise FALSE
      * @throws Exception\ConnectionException
      * @api
      */
-    public function isCommentSpam($permaLink, $content, $type, $author = '', $authorEmailAddress = '', $authorUri = ''): bool
+    public function isCommentSpam(string $permaLink, string $content, string $type, string $author = '', string $authorEmailAddress = '', string $authorUri = ''): bool
     {
         if ($this->settings['apiKey'] === '' || $this->settings['apiKey'] === null) {
             $this->logger->debug('Could not check comment for spam because no Akismet API key was provided in the settings.', LogEnvironment::fromMethodName(__METHOD__));
@@ -170,7 +170,7 @@ class Service
 
                 return false;
             default:
-                throw new Exception\ConnectionException('API error: ' . $response->getContent() . ' ' . $response->getHeader('X-akismet-debug-help'), 1335192487);
+                throw new Exception\ConnectionException('API error: ' . $response->getBody()->getContents() . ' ' . reset($response->getHeaders()['X-akismet-debug-help']), 1335192487);
         }
     }
 
@@ -263,7 +263,7 @@ class Service
             throw new Exception\ConnectionException('Could not connect to Akismet API, virtual browser returned "' . var_export($response, true) . '"', 1335190115);
         }
         if ($response->getStatusCode() !== 200) {
-            throw new Exception\ConnectionException('The Akismet API server did not respond with a 200 status code: "' . $response->getStatus() . '"', 1335190117);
+            throw new Exception\ConnectionException('The Akismet API server did not respond with a 200 status code: "' . $response->getStatusCode() . '"', 1335190117);
         }
 
         return $response;
